@@ -148,8 +148,8 @@ add-zsh-hook precmd _omz_async_request
 # Display branch info
 
 function _parse_arc_dirty() {
-    local STATUS=$(arc diff 2>/dev/null)
-    if [[ -n $STATUS ]]; then
+    local arc_status=$(arc status --short 2> /dev/null | tail -1)
+    if [[ -n $arc_status ]]; then
         echo "$ZSH_THEME_GIT_PROMPT_DIRTY"
     else
         echo "$ZSH_THEME_GIT_PROMPT_CLEAN"
@@ -159,13 +159,15 @@ function _parse_arc_dirty() {
 function _arc_current_branch() {
     local info=$(arc info 2> /dev/null)
     local branch=$(echo "$info" | grep "^branch:" | cut -d' ' -f2)
-    if [[ -n $branch ]]; then
-        echo "${branch}"
+    local hash=$(echo "$info" | grep "^hash:" | cut -d' ' -f2)
+
+    if [[ -n $branch && $branch == $hash ]]; then
+        echo "$(echo "$hash" | head -c 8)"
         return
     fi
-    local hash=$(echo "$info" | grep "^hash:" | cut -d' ' -f2 | head -c 8)
-    if [[ -n $hash ]]; then
-        echo "${hash}"
+
+    if [[ -n $branch ]]; then
+        echo "${branch}"
     fi
 }
 
@@ -195,11 +197,11 @@ alias ap="arc pull"
 alias apt="arc pull trunk"
 alias art="arc pull trunk && arc rebase trunk"
 
-alias ac="arc commit $1 --no-verify"
-alias aca="arc commit $1 --amend --no-verify"
+alias ac="arc commit --no-verify"
+alias aca="arc commit --amend --no-verify"
 alias acan="arc commit --amend --no-edit --no-verify"
 
-alias aprc="arc pr create $1 --no-verify"
+alias aprc="arc pr create --no-verify --m='$1'"
 alias apf="arc push --force"
 
 function ach() {
