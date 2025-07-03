@@ -149,6 +149,7 @@ add-zsh-hook precmd _omz_async_request
 
 function _parse_arc_dirty() {
     local arc_status=$(arc status --short 2> /dev/null | tail -1)
+
     if [[ -n $arc_status ]]; then
         echo "$ZSH_THEME_GIT_PROMPT_DIRTY"
     else
@@ -177,7 +178,6 @@ function _arc_prompt_info() {
 
     if [[ -n $branch ]]; then
         echo "${ZSH_THEME_GIT_PROMPT_PREFIX}${branch:gs/%/%%}$(_parse_arc_dirty)${ZSH_THEME_GIT_PROMPT_SUFFIX}"
-        return
     fi
 }
 
@@ -211,4 +211,32 @@ function ach() {
 	fi
 
 	arc checkout $1 || arc checkout -b $1
+}
+
+function am() {
+    local mount="$HOME/arcs/arcadia"
+    local store="$HOME/arcs/store"
+
+    if [[ -n $1 ]]; then
+        mount="$mount-$1"
+        store="$store-$1"
+    fi
+
+    mkdir -p $mount 2> /dev/null
+    mkdir -p $store 2> /dev/null
+    arc mount -m $mount -S $store
+}
+
+function aum() {
+    local mount="$HOME/arcs/arcadia"
+
+    if [[ -n $1 ]]; then
+        mount="$mount-$1"
+    fi
+
+    local unmounted=$(arc unmount -m $mount 2> /dev/null)
+
+    if [[ -z $unmounted ]]; then
+        diskutil unmount force $mount
+    fi
 }

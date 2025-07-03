@@ -31,7 +31,7 @@
     ```zsh
     PROMPT="...$(arc_prompt_info_async)"
     ```
-> Пример того как должен выглядеть файл, можно найти в `examples/crunch.zsh-theme.exmaple`
+> Пример того как должен выглядеть файл, можно найти в `examples/crunch.zsh-theme.example`
 
 Перезапустите терминал или примените изменения командой `source ~/.zshrc`
 Готово! Теперь перейдите в репозиторий с arc и проверьте, что ветка отображается
@@ -42,6 +42,8 @@
 
 | Команда              | Эквивалент Arc                                   | Описание |
 |----------------------|--------------------------------------------------|----------|
+| `am [suffix]`        | `arc mount -m ~/arcs/arcadia[-suffix] -S ~/arcs/store[-suffix]` | Монтировать репозиторий в кастомные директории |
+| `aum [suffix]`       | `arc unmount -m ~/arcs/arcadia[-suffix]` or `diskutil unmount force ~/arcs/arcadia[-suffix]`         | Размонтировать репозиторий из кастомных директорий |
 | `ast`                | `arc st`                                         | Показать статус репозитория |
 | `ap`                 | `arc pull`                                       | Получить актуальные изменения из origin |
 | `apt`                | `arc pull trunk`                                 | Получить изменения из `trunk` |
