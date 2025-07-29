@@ -172,12 +172,27 @@ function _arc_current_branch() {
     fi
 }
 
+function _wrap_hyperlink() {
+    local display_text="$1"
+    local link_template="${ARC_BRANCH_LINK_TEMPLATE}"
+
+    if [[ -z $link_template ]]; then
+        echo "${display_text}"
+        return
+    fi
+
+    # Substitute {branch_name} with the actual branch name
+    local link="${link_template//\{branch_name\}/$display_text}"
+    echo "\e]8;;${link}\e\\${display_text}\e]8;;\e\\"
+}
+
 function _arc_prompt_info() {
     local info=$(arc info 2> /dev/null)
     local branch=$(_arc_current_branch)
 
     if [[ -n $branch ]]; then
-        echo "${ZSH_THEME_GIT_PROMPT_PREFIX}${branch:gs/%/%%}$(_parse_arc_dirty)${ZSH_THEME_GIT_PROMPT_SUFFIX}"
+        local branch_with_link=$(_wrap_hyperlink "$branch")
+        echo "${ZSH_THEME_GIT_PROMPT_PREFIX}${branch_with_link}$(_parse_arc_dirty)${ZSH_THEME_GIT_PROMPT_SUFFIX}"
     fi
 }
 
@@ -197,11 +212,11 @@ alias ap="arc pull"
 alias apt="arc pull trunk"
 alias art="arc pull trunk && arc rebase trunk"
 
-alias ac="arc commit --no-verify"
+alias ac="arc commit -m '$1' --no-verify"
 alias aca="arc commit --amend --no-verify"
 alias acan="arc commit --amend --no-edit --no-verify"
 
-alias aprc="arc pr create --no-verify --m='$1'"
+alias aprc="arc pr create -m '$1' --no-verify"
 alias apf="arc push --force"
 
 function ach() {
@@ -210,33 +225,6 @@ function ach() {
 		return 1
 	fi
 
-	arc checkout $1 || arc checkout -b $1
-}
-
-function am() {
-    local mount="$HOME/arcs/arcadia"
-    local store="$HOME/arcs/store"
-
-    if [[ -n $1 ]]; then
-        mount="$mount-$1"
-        store="$store-$1"
-    fi
-
-    mkdir -p $mount 2> /dev/null
-    mkdir -p $store 2> /dev/null
-    arc mount -m $mount -S $store
-}
-
-function aum() {
-    local mount="$HOME/arcs/arcadia"
-
-    if [[ -n $1 ]]; then
-        mount="$mount-$1"
-    fi
-
-    local unmounted=$(arc unmount -m $mount 2> /dev/null)
-
-    if [[ -z $unmounted ]]; then
-        diskutil unmount force $mount
-    fi
+    local username="$(arc user-info | grep "^Token login:" | cut -d' ' -f3)"
+	arc checkout $1 || arc checkout users/$username/$1 || arc checkout -b $1
 }
