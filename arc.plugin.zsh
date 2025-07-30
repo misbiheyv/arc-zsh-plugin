@@ -183,7 +183,7 @@ function _wrap_hyperlink() {
 
     # Substitute {branch_name} with the actual branch name
     local link="${link_template//\{branch_name\}/$display_text}"
-    echo "\e]8;;${link}\e\\${display_text}\e]8;;\e\\"
+    printf '\e]8;;%s\e\\%s\e]8;;\e\\\n' "$link" $'\uFEFF'"$display_text"
 }
 
 function _arc_prompt_info() {
